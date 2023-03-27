@@ -1,20 +1,81 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from "react";
+import { StatusBar, Modal } from "react-native";
+
+import ModalDetalhes from "./src/components/ModalDetalhes";
+
+import {
+  Container,
+  TextoTitulo,
+  Image,
+  ContainerItens,
+  ContainerInputs,
+  Input,
+  TextoInput,
+  ContainerButton,
+  Button,
+  ButtonTexto,
+} from "./styles";
 
 export default function App() {
+  const [precoGasolina, setPrecoGasolina] = useState(null);
+  const [precoAlcool, setPrecoAlcool] = useState(null);
+  const [abrirModal, setAbrirModal] = useState(false);
+  const [recomendacao, setRecomendacao] = useState("");
+
+  const totalDivisao = precoAlcool / precoGasolina;
+
+  function calcularPrecos() {
+    if (precoGasolina == null || precoAlcool == null) return;
+
+    if (totalDivisao < 0.7) {
+      setRecomendacao("Álcool");
+    } else {
+      setRecomendacao("Gasolina");
+    }
+
+    setAbrirModal(true);
+  }
+
+  function fecharModal() {
+    setAbrirModal(false);
+    setPrecoAlcool(null);
+    setPrecoGasolina(null);
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Container>
+      <ContainerItens>
+        <Image source={require("./assets/logo.png")} />
+        <TextoTitulo>Qual a melhor opção?</TextoTitulo>
+      </ContainerItens>
+      <ContainerInputs>
+        <TextoInput>Álcool (preço por litro)</TextoInput>
+        <Input
+          value={precoAlcool}
+          keyboardType="numeric"
+          onChangeText={(value) => setPrecoAlcool(value)}
+        />
+        <TextoInput>Gasolina (preço por litro)</TextoInput>
+        <Input
+          value={precoGasolina}
+          keyboardType="numeric"
+          onChangeText={(value) => setPrecoGasolina(value)}
+        />
+      </ContainerInputs>
+      <ContainerButton>
+        <Button onPress={calcularPrecos}>
+          <ButtonTexto>Calcular</ButtonTexto>
+        </Button>
+      </ContainerButton>
+      <Modal visible={abrirModal} animationType="slide" transparent={false}>
+        <ModalDetalhes
+          fechar={fecharModal}
+          tipoCombustivel={recomendacao}
+          valorGasolina={precoGasolina}
+          valorAlcool={precoAlcool}
+        />
+      </Modal>
+      <StatusBar barStyle="ligth-content" backgroundColor="#231f20" />
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
